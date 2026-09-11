@@ -6,13 +6,15 @@ services:
     container_name: mysql_customer_db
     restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_ROOT_PASSWORD: utec
       MYSQL_DATABASE: cloud_eats_users
     ports:
       - "3306:3306"
     volumes:
       - mysql_data:/var/lib/mysql
-      - ./init-db:/docker-entrypoint-initdb.d
+    networks:
+      - red_bd
+
   adminer:
     image: adminer
     container_name: adminer_gui
@@ -21,8 +23,9 @@ services:
       - "8080:8080"
     depends_on:
       - db
-    
-  
+    networks:
+      - red_bd
+
   ms-customer:
     build: .
     container_name: ms_customer_api
@@ -31,13 +34,21 @@ services:
       - "8000:8000"
     environment:
       - DB_HOST=db
-      - DB_USER=root
-      - DB_PASSWORD=rootpassword
-      - DB_NAME=cloud_eats_users
       - DB_PORT=3306
+      - DB_USER=root
+      - DB_PASSWORD=utec
+      - DB_NAME=cloud_eats_users
       - JWT_SECRET=cloudeats_super_secret_key_2026
+      - S3_BUCKET_NAME=cloud-eats-users-bucket-2026
+      - AWS_REGION=us-east-1
     depends_on:
       - db
+    networks:
+      - red_bd
 
 volumes:
   mysql_data:
+
+networks:
+  red_bd:
+    driver: bridge
